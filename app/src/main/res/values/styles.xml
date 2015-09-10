@@ -1,0 +1,39 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar.FullScreen">
+        <item name="android:windowTranslucentStatus">true</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Button" parent="AppTheme">
+        <item name="android:minWidth">88dp</item>
+        <item name="android:height">36dp</item>
+        <item name="android:background">@drawable/button_selector</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+    </style>
+
+    <style name="ProgressBarStyle" parent="@android:style/Widget.ProgressBar.Horizontal"/>
+
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="Theme.AppCompat.Light">
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="ToolbarTitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+
+    <style name="Widget.MyApp.HeaderBar.Spinner" parent="Widget.AppCompat.Light.Spinner.DropDown.ActionBar">
+        <item name="android:background">?android:selectableItemBackground</item>
+        <item name="android:dropDownSelector">?android:selectableItemBackground</item>
+        <item name="android:divider">@null</item>
+    </style>
+
+</resources>

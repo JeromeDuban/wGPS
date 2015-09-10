@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">wGPS</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="openDrawer">openDrawer</string>
+    <string name="closeDrawer">closeDrawer</string>
+
+</resources>
