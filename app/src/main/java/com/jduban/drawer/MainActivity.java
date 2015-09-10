@@ -9,39 +9,27 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.jduban.drawer.utils.MyAdapter;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    // Drawer menu titles
-    String TITLES[] = {"Fragment 1", "Fragment 2","Fragment 3","test"};
-
-    //Drawer menu icons
-    int ICONS[] = {R.mipmap.ic_launcher,
-            R.mipmap.ic_launcher,
-            R.mipmap.ic_launcher};
-
-
-    String NAME = "Jérôme Duban";
-    String EMAIL = "jejefcgb@gmail.com";
-    int PROFILE = R.mipmap.ic_launcher;
-
-    private Toolbar toolbar;                              // Declaring the Toolbar Object
-
-    RecyclerView mRecyclerView;                           // Declaring RecyclerView
-    RecyclerView.Adapter mAdapter;                        // Declaring Adapter For Recycler View
-    RecyclerView.LayoutManager mLayoutManager;            // Declaring Layout Manager as a linear layout manager
-    DrawerLayout mDrawer;                                  // Declaring DrawerLayout
-
-    ActionBarDrawerToggle mDrawerToggle;                  // Declaring Action Bar mDrawer Toggle
+    private String mValues[] = {"Fragment 1", "Fragment 2","Fragment 3","test"};
+    private Toolbar mToolbar;
+    RecyclerView mRecyclerView;
+    RecyclerView.Adapter mAdapter;
+    RecyclerView.LayoutManager mLayoutManager;
+    DrawerLayout mDrawer;
+    ActionBarDrawerToggle mDrawerToggle;
 
     // UI COMPONENTS
     private FragmentManager fm;
@@ -55,19 +43,13 @@ public class MainActivity extends ActionBarActivity {
         fm = getFragmentManager();
         fm.beginTransaction().replace(R.id.container, new Fragment1()).commit();
 
+        mToolbar = (Toolbar) findViewById(R.id.tool_bar);
+        setSupportActionBar(mToolbar);
 
-        toolbar = (Toolbar) findViewById(R.id.tool_bar);
-        setSupportActionBar(toolbar);
-
-        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
-
-        mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
-
-        mAdapter = new MyAdapter(TITLES);       // Creating the Adapter of MyAdapter class(which we are going to see in a bit)
-        // And passing the titles,icons,header view name, header view email,
-        // and header view profile picture
-
-        mRecyclerView.setAdapter(mAdapter);                              // Setting the adapter to RecyclerView
+        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
+        mRecyclerView.setHasFixedSize(true);
+        mAdapter = new MyAdapter(mValues);
+        mRecyclerView.setAdapter(mAdapter);
 
 
         final GestureDetector mSingleTapDetector = new GestureDetector(MainActivity.this, new GestureDetector.SimpleOnGestureListener() {
@@ -106,7 +88,6 @@ public class MainActivity extends ActionBarActivity {
                             break;
 
                     }
-
                     fm.beginTransaction().replace(R.id.container, f).commit();
                     return true;
                 }
@@ -126,7 +107,7 @@ public class MainActivity extends ActionBarActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);                 // Setting the layout Manager
 
         mDrawer = (DrawerLayout) findViewById(R.id.DrawerLayout);        // mDrawer object Assigned to the view
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.openDrawer, R.string.closeDrawer) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer, mToolbar, R.string.openDrawer, R.string.closeDrawer) {
 
             @Override
             public void onDrawerOpened(View drawerView) {
@@ -143,11 +124,40 @@ public class MainActivity extends ActionBarActivity {
 
 
         }; // mDrawer Toggle Object Made
+
         mDrawer.setDrawerListener(mDrawerToggle); // mDrawer Listener set to the mDrawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
 
+
     }
 
+    public void setDrawerState(boolean isEnabled) {
+        if ( isEnabled ) {
+            Log.d("Drawer","Drawer enabled");
+            mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_UNLOCKED);
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
+            mDrawerToggle.syncState();
+
+        }
+        else {
+            Log.d("Drawer","Drawer disabled");
+            mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            mDrawerToggle.setDrawerIndicatorEnabled(false);
+            mDrawerToggle.syncState();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if(getResources().getBoolean(R.bool.dual_pane))
+            setDrawerState(false);
+        else
+            setDrawerState(true);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
