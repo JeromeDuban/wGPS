@@ -2,6 +2,10 @@ package com.jduban.drawer;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -16,9 +20,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jduban.drawer.utils.MyAdapter;
 
@@ -33,8 +36,16 @@ public class MainActivity extends ActionBarActivity {
     DrawerLayout mDrawer;
     ActionBarDrawerToggle mDrawerToggle;
 
+    GestureDetector mSingleTapDetector;
+
     // UI COMPONENTS
     private FragmentManager fm;
+    private RelativeLayout layoutMap;
+    private LinearLayout layoutMenu;
+    private MapFragment mapFragment;
+    private MenuFragment menuFragment;
+
+    private boolean portrait;
 
 
     @Override
@@ -45,13 +56,7 @@ public class MainActivity extends ActionBarActivity {
         mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
-        mRecyclerView.setHasFixedSize(true);
-        mAdapter = new MyAdapter(mValues);
-        mRecyclerView.setAdapter(mAdapter);
-
-
-        final GestureDetector mSingleTapDetector = new GestureDetector(MainActivity.this, new GestureDetector.SimpleOnGestureListener() {
+        mSingleTapDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
@@ -59,33 +64,13 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+        portrait = getResources().getBoolean(R.bool.dual_pane);
 
-                if (child != null && mSingleTapDetector.onTouchEvent(motionEvent)) {
-                    mDrawer.closeDrawers();
-                    Fragment f ;
-                    switch (recyclerView.getChildPosition(child)){
-                        default:
-//                            f = new Fragment1();
-                            break;
-
-                    }
-//                    fm.beginTransaction().replace(R.id.container, f).commit();
-                    return true;
-                }
-
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-
-            }
-        });
-
+        mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
+        mRecyclerView.setHasFixedSize(true);
+        mAdapter = new MyAdapter(mValues);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addOnItemTouchListener(recyclerListener);
 
         mLayoutManager = new LinearLayoutManager(this);                 // Creating a layout Manager
 
@@ -109,33 +94,86 @@ public class MainActivity extends ActionBarActivity {
         mDrawer.setDrawerListener(mDrawerToggle); // mDrawer Listener set to the mDrawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
 
-        // Layouts
-        RelativeLayout layoutMap = (RelativeLayout) findViewById(R.id.fragmentMap);
-        RelativeLayout layoutMenu = (RelativeLayout) findViewById(R.id.fragmentMenu);
+        layoutMap = (RelativeLayout) findViewById(R.id.fragmentMap);
+        layoutMenu = (LinearLayout) findViewById(R.id.fragmentMenu);
 
-        if(!getResources().getBoolean(R.bool.dual_pane)){
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragmentMap);
+        menuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
+
+        // Displays the menu fragment in landscape
+        if(!portrait){
             layoutMenu.setVisibility(View.GONE);
         }
         else{
             layoutMenu.setVisibility(View.VISIBLE);
         }
 
-        TextView test = (TextView) layoutMap.findViewById(R.id.textView);
-        test.setText("map modified");
-
-
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragmentMap);
-        MenuFragment menuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
+        startLocationListener();
 
 //        if (menuFragment==null || ! menuFragment.isInLayout()) {}
 //        else {}
 
+    }
 
+    RecyclerView.OnItemTouchListener recyclerListener = new RecyclerView.OnItemTouchListener() {
+        @Override
+        public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+            View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+
+            if (child != null && mSingleTapDetector.onTouchEvent(motionEvent)) {
+                mDrawer.closeDrawers();
+                Fragment f;
+                switch (recyclerView.getChildPosition(child)) {
+                    default:
+//                            f = new Fragment1();
+                        break;
+
+                }
+//                    fm.beginTransaction().replace(R.id.container, f).commit();
+                return true;
+            }
+
+            return false;
+        }
+
+        @Override
+        public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+
+        }
+    };
+
+    private void startLocationListener(){
+
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, new LocationListener() {
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+
+            @Override
+            public void onLocationChanged(Location location) {
+                Log.d("GPS", "Latitude " + location.getLatitude() + " et longitude " + location.getLongitude());
+                mValues[0] = location.getLatitude() + " " + location.getLongitude(); //TODO convert to DMS format
+                mAdapter.notifyDataSetChanged();
+            }
+
+        });
     }
 
     public void setDrawerState(boolean isEnabled) {
         if ( isEnabled ) {
-            Log.d("Drawer","Drawer enabled");
             mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_UNLOCKED);
             mDrawerToggle.setDrawerIndicatorEnabled(true);
@@ -143,7 +181,6 @@ public class MainActivity extends ActionBarActivity {
 
         }
         else {
-            Log.d("Drawer","Drawer disabled");
             mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             mDrawerToggle.setDrawerIndicatorEnabled(false);
