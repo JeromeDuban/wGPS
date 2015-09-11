@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.jduban.drawer.R;
 
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+public class recyclerAdapter extends RecyclerView.Adapter<recyclerAdapter.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_COORDINATE = 1;
@@ -46,13 +46,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     }
 
 
-    public MyAdapter(String Titles[]) {
+    public recyclerAdapter(String Titles[]) {
         mValues = Titles;
     }
 
 
     @Override
-    public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public recyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
 
         if (viewType == TYPE_COORDINATE) {
@@ -76,9 +76,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
 
     @Override
-    public void onBindViewHolder(MyAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(recyclerAdapter.ViewHolder holder, int position) {
 
-        if (holder.Holderid == 1 || holder.Holderid == 2)
+        if (holder.Holderid == 1 || holder.Holderid == 2) // Coordinates and saved locations
             holder.textView.setText(mValues[position - 1]);
 
     }

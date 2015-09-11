@@ -16,19 +16,21 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import com.jduban.drawer.utils.MyAdapter;
+import com.jduban.drawer.utils.recyclerAdapter;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    private String mValues[] = {"Fragment 1", "Fragment 2","Fragment 3","test"};
+    private String mValues[] = {"", "Location 1","Location 2","Location 3"};
     private Toolbar mToolbar;
     RecyclerView mRecyclerView;
     RecyclerView.Adapter mAdapter;
@@ -45,7 +47,10 @@ public class MainActivity extends ActionBarActivity {
     private MapFragment mapFragment;
     private MenuFragment menuFragment;
 
-    private boolean portrait;
+    private boolean landscape;
+    private TextView menuTextView;
+    private LinearLayout locationContainer;
+    private LayoutInflater inflater;
 
 
     @Override
@@ -64,11 +69,11 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        portrait = getResources().getBoolean(R.bool.dual_pane);
+        landscape = getResources().getBoolean(R.bool.dual_pane);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new MyAdapter(mValues);
+        mAdapter = new recyclerAdapter(mValues);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnItemTouchListener(recyclerListener);
 
@@ -97,15 +102,28 @@ public class MainActivity extends ActionBarActivity {
         layoutMap = (RelativeLayout) findViewById(R.id.fragmentMap);
         layoutMenu = (LinearLayout) findViewById(R.id.fragmentMenu);
 
+        menuTextView = (TextView) layoutMenu.findViewById(R.id.coordinate).findViewById(R.id.rowText);
+        locationContainer = (LinearLayout) layoutMenu.findViewById(R.id.locationContainer);
+        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragmentMap);
         menuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
 
         // Displays the menu fragment in landscape
-        if(!portrait){
+        if(!landscape){
             layoutMenu.setVisibility(View.GONE);
         }
         else{
             layoutMenu.setVisibility(View.VISIBLE);
+            locationContainer.removeAllViews();
+
+            for (int i = 1 ; i < mValues.length ; i++) {
+
+                View view = inflater.inflate(R.layout.location, locationContainer, false);
+                ((TextView) view.findViewById(R.id.rowText)).setText(mValues[i]);
+                locationContainer.addView(view);
+
+            }
         }
 
         startLocationListener();
@@ -145,7 +163,7 @@ public class MainActivity extends ActionBarActivity {
     private void startLocationListener(){
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 2, new LocationListener() {
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, new LocationListener() {
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -166,7 +184,12 @@ public class MainActivity extends ActionBarActivity {
             public void onLocationChanged(Location location) {
                 Log.d("GPS", "Latitude " + location.getLatitude() + " et longitude " + location.getLongitude());
                 mValues[0] = location.getLatitude() + " " + location.getLongitude(); //TODO convert to DMS format
-                mAdapter.notifyDataSetChanged();
+                if(!landscape){
+                    mAdapter.notifyDataSetChanged();
+                }else{
+                    menuTextView.setText(mValues[0]);
+                }
+
             }
 
         });
@@ -191,8 +214,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        if(getResources().getBoolean(R.bool.dual_pane))
+        if(landscape)
             setDrawerState(false);
         else
             setDrawerState(true);
