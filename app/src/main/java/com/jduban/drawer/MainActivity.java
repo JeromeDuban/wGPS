@@ -16,6 +16,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jduban.drawer.utils.MyAdapter;
@@ -40,9 +42,6 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fm = getFragmentManager();
-        fm.beginTransaction().replace(R.id.container, new Fragment1()).commit();
-
         mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
 
@@ -60,11 +59,6 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        ////////////////////////////////
-        ///          DRAWER          ///
-        ////////////////////////////////
-
-
         mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
@@ -74,21 +68,12 @@ public class MainActivity extends ActionBarActivity {
                     mDrawer.closeDrawers();
                     Fragment f ;
                     switch (recyclerView.getChildPosition(child)){
-                        case 1:
-                            f = new Fragment1();
-                            break;
-                        case 2 :
-                            f = new Fragment2();
-                            break;
-                        case 3 :
-                            f = new Fragment3();
-                            break;
                         default:
-                            f = new Fragment1();
+//                            f = new Fragment1();
                             break;
 
                     }
-                    fm.beginTransaction().replace(R.id.container, f).commit();
+//                    fm.beginTransaction().replace(R.id.container, f).commit();
                     return true;
                 }
 
@@ -112,21 +97,38 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                // code here will execute once the drawer is opened( As I dont want anything happened whe drawer is
-                // open I am not going to put anything here)
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                // Code here will execute once drawer is closed
             }
 
-
-        }; // mDrawer Toggle Object Made
+        };
 
         mDrawer.setDrawerListener(mDrawerToggle); // mDrawer Listener set to the mDrawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
+
+        // Layouts
+        RelativeLayout layoutMap = (RelativeLayout) findViewById(R.id.fragmentMap);
+        RelativeLayout layoutMenu = (RelativeLayout) findViewById(R.id.fragmentMenu);
+
+        if(!getResources().getBoolean(R.bool.dual_pane)){
+            layoutMenu.setVisibility(View.GONE);
+        }
+        else{
+            layoutMenu.setVisibility(View.VISIBLE);
+        }
+
+        TextView test = (TextView) layoutMap.findViewById(R.id.textView);
+        test.setText("map modified");
+
+
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragmentMap);
+        MenuFragment menuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
+
+//        if (menuFragment==null || ! menuFragment.isInLayout()) {}
+//        else {}
 
 
     }
