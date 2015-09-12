@@ -33,6 +33,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.jduban.drawer.utils.recyclerAdapter;
+import com.karumi.expandableselector.ExpandableItem;
+import com.karumi.expandableselector.ExpandableSelector;
+import com.karumi.expandableselector.OnExpandableItemClickListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
@@ -141,8 +147,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        if (menuFragment==null || ! menuFragment.isInLayout()) {}
-//        else {}
+        initializeIconsExpandableSelector();
 
     }
 
@@ -301,5 +306,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
+    }
+    private void initializeIconsExpandableSelector() {
+        final ExpandableSelector iconsExpandableSelector = (ExpandableSelector) findViewById(R.id.selector);
+        List<ExpandableItem> expandableItems = new ArrayList<>();
+        ExpandableItem item = new ExpandableItem();
+        item.setResourceId(R.mipmap.ic_launcher);
+        expandableItems.add(item);
+        item = new ExpandableItem();
+        item.setResourceId(R.mipmap.ic_launcher);
+        expandableItems.add(item);
+        item = new ExpandableItem();
+        item.setResourceId(R.mipmap.ic_launcher);
+        expandableItems.add(item);
+        iconsExpandableSelector.showExpandableItems(expandableItems);
+
+        iconsExpandableSelector.setOnExpandableItemClickListener(new OnExpandableItemClickListener() {
+            @Override
+            public void onExpandableItemClickListener(int i, View view) {
+                iconsExpandableSelector.collapse();
+            }
+        });
     }
 }
