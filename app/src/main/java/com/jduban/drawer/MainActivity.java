@@ -2,10 +2,15 @@ package com.jduban.drawer;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -24,6 +29,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -59,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double lastLatitude;
     private double lastLongitude;
     private boolean isMapReady = false;
+    private boolean landscape;
 
     // UI COMPONENTS
     private FragmentManager fm;
@@ -66,11 +73,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LinearLayout layoutMenu;
     private MenuFragment menuFragment;
 
-    private boolean landscape;
     private TextView menuTextView;
     private LinearLayout locationContainer;
     private LayoutInflater inflater;
     private MapFragment mapFragment;
+    private TextView connectivityWarning;
 
 
     @Override
@@ -150,7 +157,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        initializeIconsExpandableSelector();
+        if (!ConstVal.isNetworkAvailable()){
+            Toast.makeText(MainActivity.this, "Please check your internet connection", Toast.LENGTH_SHORT).show();
+        }
+
+        initializeMapTypeSelector();
+
+        connectivityWarning = (TextView) findViewById(R.id.connectivityWaring);
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkStateReceiver, filter);
 
     }
 
@@ -186,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void startLocationListener(){
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, new LocationListener() {
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 1, new LocationListener() { // TODO : set variables
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -247,6 +262,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             setDrawerState(false);
         else
             setDrawerState(true);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkStateReceiver);
     }
 
     @Override
@@ -328,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         map.getUiSettings().setMyLocationButtonEnabled(true);
     }
 
-    private void initializeIconsExpandableSelector() {
+    private void initializeMapTypeSelector() {
         final ExpandableSelector iconsExpandableSelector = (ExpandableSelector) findViewById(R.id.selector);
         List<ExpandableItem> expandableItems = new ArrayList<>();
         ExpandableItem item = new ExpandableItem();
@@ -379,5 +406,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
     }
+
+
+    BroadcastReceiver networkStateReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
+            if (!isConnected ) {        //TODO Add animation
+                connectivityWarning.setVisibility(View.VISIBLE);
+            } else {
+                connectivityWarning.setVisibility(View.GONE);
+            }
+
+        }
+    };
+
 }
 
