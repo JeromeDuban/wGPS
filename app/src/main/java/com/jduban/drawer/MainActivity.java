@@ -35,11 +35,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.jduban.drawer.utils.recyclerAdapter;
 import com.karumi.expandableselector.ExpandableItem;
 import com.karumi.expandableselector.ExpandableSelector;
+import com.karumi.expandableselector.ExpandableSelectorListener;
 import com.karumi.expandableselector.OnExpandableItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO save Map type
+//TODO save user zoom choice
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
 
@@ -290,13 +293,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void zoomOnUser(double latitude, double longitude){
 
         GoogleMap map = mapFragment.getMap();
-
         if (map != null && isMapReady){
 
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude), 18);
             map.animateCamera(cameraUpdate);
         }
+    }
 
+    public void setMapType(int type){
+
+        GoogleMap map = mapFragment.getMap();
+        if (map != null && isMapReady){
+            switch (type){
+                case 1:
+                    map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    break;
+                case 2:
+                    map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                    break;
+                default:
+                    map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    break;
+            }
+
+        }
     }
 
     @Override
@@ -307,25 +327,57 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
     }
+
     private void initializeIconsExpandableSelector() {
         final ExpandableSelector iconsExpandableSelector = (ExpandableSelector) findViewById(R.id.selector);
         List<ExpandableItem> expandableItems = new ArrayList<>();
         ExpandableItem item = new ExpandableItem();
-        item.setResourceId(R.mipmap.ic_launcher);
+        item.setResourceId(R.mipmap.ic_expand);
         expandableItems.add(item);
         item = new ExpandableItem();
-        item.setResourceId(R.mipmap.ic_launcher);
+        item.setResourceId(R.mipmap.ic_plan);
         expandableItems.add(item);
         item = new ExpandableItem();
-        item.setResourceId(R.mipmap.ic_launcher);
+        item.setResourceId(R.mipmap.ic_satellite);
         expandableItems.add(item);
         iconsExpandableSelector.showExpandableItems(expandableItems);
+
+        iconsExpandableSelector.setExpandableSelectorListener(new ExpandableSelectorListener() {
+            @Override
+            public void onCollapse() {
+                ExpandableItem item = new ExpandableItem();
+                item.setResourceId(R.mipmap.ic_expand);
+                iconsExpandableSelector.updateExpandableItem(0,item);
+            }
+
+            @Override
+            public void onExpand() {
+                ExpandableItem item = new ExpandableItem();
+                item.setResourceId(R.mipmap.ic_collapse);
+                iconsExpandableSelector.updateExpandableItem(0,item);
+            }
+
+            @Override
+            public void onCollapsed() {
+
+            }
+
+            @Override
+            public void onExpanded() {
+
+            }
+        });
 
         iconsExpandableSelector.setOnExpandableItemClickListener(new OnExpandableItemClickListener() {
             @Override
             public void onExpandableItemClickListener(int i, View view) {
+                if (i !=0)
+                    setMapType(i);
+
                 iconsExpandableSelector.collapse();
             }
         });
+
     }
 }
+
