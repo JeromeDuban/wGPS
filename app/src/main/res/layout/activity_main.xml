@@ -42,28 +42,32 @@
                     android:name="com.google.android.gms.maps.MapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
-
-                <TextView
-                    android:id="@+id/gpsWarning"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_above="@+id/connectivityWaring"
-                    android:background="#FF0000"
-                    android:gravity="center"
-                    android:text="GPS signal lost"
-                    android:textColor="#FFFFFF"
-                    android:visibility="gone" />
+                    android:orientation="vertical"
+                    android:layout_alignParentBottom="true">
+                    <TextView
+                        android:id="@+id/gpsWarning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF0000"
+                        android:gravity="center"
+                        android:text="GPS signal lost"
+                        android:textColor="#FFFFFF"
+                        android:visibility="gone"/>
 
-                <TextView
-                    android:id="@+id/connectivityWaring"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:background="#FF8800"
-                    android:gravity="center"
-                    android:text="No internet connection"
-                    android:textColor="#FFFFFF"
-                    android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/connectivityWaring"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF8800"
+                        android:gravity="center"
+                        android:text="No internet connection"
+                        android:textColor="#FFFFFF"
+                        android:visibility="gone" />
+                </LinearLayout>
+
 
             </RelativeLayout>
 

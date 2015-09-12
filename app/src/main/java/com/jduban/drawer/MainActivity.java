@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LayoutInflater inflater;
     private MapFragment mapFragment;
     private TextView connectivityWarning;
+    private TextView gpsWarning;
 
 
     @Override
@@ -164,7 +165,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         initializeMapTypeSelector();
 
         connectivityWarning = (TextView) findViewById(R.id.connectivityWaring);
+        gpsWarning = (TextView) findViewById(R.id.gpsWarning);
+
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction("android.location.GPS_ENABLED_CHANGE");
         registerReceiver(networkStateReceiver, filter);
 
     }
@@ -210,11 +214,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onProviderEnabled(String provider) {
-
+                if(LocationManager.GPS_PROVIDER.equals(provider)){
+                    gpsWarning.setVisibility(View.GONE);
+                }
             }
 
             @Override
             public void onProviderDisabled(String provider) {
+                if(LocationManager.GPS_PROVIDER.equals(provider)){
+                    gpsWarning.setVisibility(View.VISIBLE);
+                }
 
             }
 
@@ -234,8 +243,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
 
             }
-
         });
+
+
+
     }
 
     public void setDrawerState(boolean isEnabled) {
@@ -306,10 +317,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    public void addMapMarker(double latitude, double longitude){
+    public void addMapMarker(double latitude, double longitude) {
         GoogleMap map = mapFragment.getMap();
 
-        if (map != null && isMapReady){
+        if (map != null && isMapReady) {
             map.addMarker(new MarkerOptions()
                     .position(new LatLng(latitude, longitude))
                     .title("Marker"));
@@ -413,16 +424,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+            if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)){
+                ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
-            if (!isConnected ) {        //TODO Add animation
-                connectivityWarning.setVisibility(View.VISIBLE);
-            } else {
-                connectivityWarning.setVisibility(View.GONE);
+                if (!isConnected ) {        //TODO Add animation
+                    connectivityWarning.setVisibility(View.VISIBLE);
+                } else {
+                    connectivityWarning.setVisibility(View.GONE);
+                }
             }
-
         }
     };
 
