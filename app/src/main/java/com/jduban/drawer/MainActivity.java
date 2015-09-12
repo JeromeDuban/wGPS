@@ -44,7 +44,6 @@ public class MainActivity extends ActionBarActivity {
     private FragmentManager fm;
     private RelativeLayout layoutMap;
     private LinearLayout layoutMenu;
-    private MapFragment mapFragment;
     private MenuFragment menuFragment;
 
     private boolean landscape;
@@ -99,14 +98,12 @@ public class MainActivity extends ActionBarActivity {
         mDrawer.setDrawerListener(mDrawerToggle); // mDrawer Listener set to the mDrawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
 
-        layoutMap = (RelativeLayout) findViewById(R.id.fragmentMap);
         layoutMenu = (LinearLayout) findViewById(R.id.fragmentMenu);
 
         menuTextView = (TextView) layoutMenu.findViewById(R.id.coordinate).findViewById(R.id.rowText);
         locationContainer = (LinearLayout) layoutMenu.findViewById(R.id.locationContainer);
         inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragmentMap);
         menuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
 
         // Displays the menu fragment in landscape
@@ -119,7 +116,7 @@ public class MainActivity extends ActionBarActivity {
 
             for (int i = 1 ; i < mValues.length ; i++) {
 
-                View view = inflater.inflate(R.layout.location, locationContainer, false);
+                View view = inflater.inflate(R.layout.location, locationContainer, false); //TODO : improve with a runnable
                 ((TextView) view.findViewById(R.id.rowText)).setText(mValues[i]);
                 locationContainer.addView(view);
 
@@ -155,8 +152,10 @@ public class MainActivity extends ActionBarActivity {
         }
 
         @Override
-        public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+        public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {}
 
+        @Override
+        public void onRequestDisallowInterceptTouchEvent(boolean b) {
         }
     };
 
