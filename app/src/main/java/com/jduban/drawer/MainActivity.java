@@ -7,15 +7,15 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,10 +25,17 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.jduban.drawer.utils.recyclerAdapter;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
 
     private String mValues[] = {"", "Location 1","Location 2","Location 3"};
     private Toolbar mToolbar;
@@ -40,6 +47,10 @@ public class MainActivity extends ActionBarActivity {
 
     GestureDetector mSingleTapDetector;
 
+    private double lastLatitude;
+    private double lastLongitude;
+    private boolean isMapReady = false;
+
     // UI COMPONENTS
     private FragmentManager fm;
     private RelativeLayout layoutMap;
@@ -50,6 +61,7 @@ public class MainActivity extends ActionBarActivity {
     private TextView menuTextView;
     private LinearLayout locationContainer;
     private LayoutInflater inflater;
+    private MapFragment mapFragment;
 
 
     @Override
@@ -106,6 +118,7 @@ public class MainActivity extends ActionBarActivity {
 
         menuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
 
+
         // Displays the menu fragment in landscape
         if(!landscape){
             layoutMenu.setVisibility(View.GONE);
@@ -124,6 +137,9 @@ public class MainActivity extends ActionBarActivity {
         }
 
         startLocationListener();
+
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
 //        if (menuFragment==null || ! menuFragment.isInLayout()) {}
 //        else {}
@@ -182,7 +198,12 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onLocationChanged(Location location) {
                 Log.d("GPS", "Latitude " + location.getLatitude() + " et longitude " + location.getLongitude());
-                mValues[0] = location.getLatitude() + " " + location.getLongitude(); //TODO convert to DMS format
+                lastLatitude = location.getLatitude();
+                lastLongitude = location.getLongitude();
+
+                mValues[0] =  lastLatitude + " " + lastLongitude ; //TODO convert to DMS format
+                zoomOnUser(lastLatitude,lastLongitude);
+
                 if(!landscape){
                     mAdapter.notifyDataSetChanged();
                 }else{
@@ -197,14 +218,15 @@ public class MainActivity extends ActionBarActivity {
     public void setDrawerState(boolean isEnabled) {
         if ( isEnabled ) {
             mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-            mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_UNLOCKED);
+//            mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_UNLOCKED);
+            mDrawerToggle.onDrawerStateChanged(DrawerLayout.STATE_SETTLING);
             mDrawerToggle.setDrawerIndicatorEnabled(true);
             mDrawerToggle.syncState();
 
         }
         else {
             mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            mDrawerToggle.onDrawerStateChanged(DrawerLayout.STATE_SETTLING);
             mDrawerToggle.setDrawerIndicatorEnabled(false);
             mDrawerToggle.syncState();
         }
@@ -245,6 +267,39 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void openDrawer(){
-        mDrawer.openDrawer(Gravity.LEFT);
+        mDrawer.openDrawer(GravityCompat.START);
+    }
+
+
+    public void addMapMarker(double latitude, double longitude){
+        GoogleMap map = mapFragment.getMap();
+
+        if (map != null && isMapReady){
+            map.addMarker(new MarkerOptions()
+                    .position(new LatLng(latitude, longitude))
+                    .title("Marker"));
+        }
+    }
+
+
+    public void zoomOnUser(double latitude, double longitude){
+
+        GoogleMap map = mapFragment.getMap();
+
+        if (map != null && isMapReady){
+
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude), 18);
+            map.animateCamera(cameraUpdate);
+        }
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        Log.i("MAP", "Map ready");
+        isMapReady = true;
+
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
     }
 }
