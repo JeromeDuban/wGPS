@@ -27,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -44,6 +45,8 @@ import com.karumi.expandableselector.OnExpandableItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import at.markushi.ui.CircleButton;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
 
@@ -80,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView mConnectivityWarning;
     private TextView mGpsWarning;
     private LocationManager mLocationManager;
-
+    private CircleButton addLocation;
 
 
     @Override
@@ -138,6 +141,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mConnectivityWarning = (TextView) findViewById(R.id.connectivityWaring);
         mGpsWarning = (TextView) findViewById(R.id.gpsWarning);
 
+        addLocation = (CircleButton) findViewById(R.id.addLocation);
+        addLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addLocation();
+            }
+        });
         // Display the menu fragment if landscape
         mLayoutMenu = (ScrollView) findViewById(R.id.fragmentMenu);
 
@@ -269,13 +279,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void setDrawerState(boolean isEnabled) {
         if ( isEnabled ) {
             mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-            mDrawerToggle.onDrawerStateChanged(DrawerLayout.STATE_SETTLING);
+//            mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_UNLOCKED);
             mDrawerToggle.setDrawerIndicatorEnabled(true);
             mDrawerToggle.syncState();
         }
         else {
             mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            mDrawerToggle.onDrawerStateChanged(DrawerLayout.STATE_SETTLING);
+//            mDrawerToggle.onDrawerStateChanged(DrawerLayout.STATE_SETTLING);
             mDrawerToggle.setDrawerIndicatorEnabled(false);
             mDrawerToggle.syncState();
         }
@@ -459,6 +469,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
+    private void addLocation() {
+        GoogleMap map = mMapFragment.getMap();
+        if (map != null && isMapReady){
+            Toast.makeText(MainActivity.this, Double.toString(map.getMyLocation().getLatitude())
+                    +":"+Double.toString(map.getMyLocation().getLongitude()), Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     /**
      * Display the map type selector
