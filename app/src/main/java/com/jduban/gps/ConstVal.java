@@ -7,18 +7,37 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.Settings;
+import android.widget.Toast;
 
 public class ConstVal extends Application{
 
-    private static Context context;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        context = this;
+
+        if (isNetworkAvailable(this)){
+            Toast.makeText(this, "Please check your internet connection", Toast.LENGTH_SHORT).show();
+        }
+
+        getLocationMode(this);
+
     }
 
-    public static boolean isNetworkAvailable() {
+    public void getLocationMode(Context context){ //TODO : display dialog
+        try {
+            if (Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE) != Settings.Secure.LOCATION_MODE_HIGH_ACCURACY){
+                Toast.makeText(ConstVal.this, "Gps not set on high accuracy", Toast.LENGTH_SHORT).show();
+
+                //startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); //to be used in MainActivity
+            }
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager= (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null;

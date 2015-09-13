@@ -29,7 +29,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -158,10 +157,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        if (!ConstVal.isNetworkAvailable()){
-            Toast.makeText(MainActivity.this, "Please check your internet connection", Toast.LENGTH_SHORT).show();
-        }
 
         initializeMapTypeSelector();
 
@@ -334,8 +329,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleMap map = mapFragment.getMap();
 
         if (map != null && map.getMyLocation() !=null  && isMapReady) {
+
             int accuracy = Math.round(map.getMyLocation().getAccuracy());
             mValues[1] = Integer.toString(accuracy) +" meters";
+
             if(!landscape){
                 mAdapter.notifyDataSetChanged();
             }else{
