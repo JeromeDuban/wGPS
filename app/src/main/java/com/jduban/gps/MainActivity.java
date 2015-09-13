@@ -51,6 +51,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
 
+    private static final long MIN_TIME_UPDATE = 500;
+    private static final float MIN_DISTANCE_UPDATE = 1;
     private String mValues[] = {"", "","Location 1","Location 2","Location 3"};
     private Toolbar mToolbar;
     RecyclerView mRecyclerView;
@@ -66,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isMapReady = false;
     private boolean landscape;
 
+    final boolean canUseGps = false;
+    final boolean canUseNetwork = false;
+
     // UI COMPONENTS
     private FragmentManager fm;
     private RelativeLayout layoutMap;
@@ -79,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MapFragment mapFragment;
     private TextView connectivityWarning;
     private TextView gpsWarning;
+    private LocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,6 +173,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         filter.addAction("android.location.GPS_ENABLED_CHANGE");
         registerReceiver(networkStateReceiver, filter);
 
+        // GPS TESTS
+//        canUseGps = whichProvider.equals("gps")|| whichProvider.equals("any");
+//        canUseNetwork = whichProvider.equals("network")|| whichProvider.equals("any");
+
+
     }
 
     RecyclerView.OnItemTouchListener recyclerListener = new RecyclerView.OnItemTouchListener() {
@@ -200,8 +211,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void startLocationListener(){
 
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 1, new LocationListener() { // TODO : set variables
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        LocationListener listener = new LocationListener() {
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -210,14 +222,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onProviderEnabled(String provider) {
-                if(LocationManager.GPS_PROVIDER.equals(provider)){
+                if (LocationManager.GPS_PROVIDER.equals(provider)) {
                     gpsWarning.setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-                if(LocationManager.GPS_PROVIDER.equals(provider)){
+                if (LocationManager.GPS_PROVIDER.equals(provider)) {
                     gpsWarning.setVisibility(View.VISIBLE);
                 }
 
@@ -225,24 +237,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onLocationChanged(Location location) {
-                Log.d("GPS", "Latitude " + location.getLatitude() + " et longitude " + location.getLongitude());
-                lastLatitude = location.getLatitude();
-                lastLongitude = location.getLongitude();
 
-                mValues[0] =  lastLatitude + " " + lastLongitude ; //TODO convert to DMS format
-                zoomOnUser(lastLatitude,lastLongitude);
-                updateAccuracy();
+                String provider;
 
-                if(!landscape){
+                if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getAccuracy() <
+                        locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getAccuracy())
+                    provider = LocationManager.GPS_PROVIDER;
+                else
+                    provider = LocationManager.NETWORK_PROVIDER;
+
+                lastLatitude = locationManager.getLastKnownLocation(provider).getLatitude();            //FIXME : Can be improved
+                lastLongitude = locationManager.getLastKnownLocation(provider).getLongitude();          // Last known location is not obviously the best
+
+                mValues[0] = lastLatitude + " " + lastLongitude; //TODO convert to DMS format
+                zoomOnUser(lastLatitude, lastLongitude);
+
+                updateAccuracy(provider);
+
+                if (!landscape) {
                     mAdapter.notifyDataSetChanged();
-                }else{
+                } else {
                     coordinatesTextView.setText(mValues[0]);
                 }
 
 
             }
-        });
+        };
 
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, listener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, listener);
 
 
     }
@@ -325,12 +348,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void updateAccuracy(){
+    public void updateAccuracy(String provider){
         GoogleMap map = mapFragment.getMap();
 
-        if (map != null && map.getMyLocation() !=null  && isMapReady) {
+        if (map != null && isMapReady) {
 
-            int accuracy = Math.round(map.getMyLocation().getAccuracy());
+            int accuracy = Math.round(locationManager.getLastKnownLocation(provider).getAccuracy());
             mValues[1] = Integer.toString(accuracy) +" meters";
 
             if(!landscape){
