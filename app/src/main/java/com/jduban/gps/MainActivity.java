@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double mLatitude;
     private double mLongitude;
     private boolean isMapReady = false;
+    private boolean isGpsEnabled = true;
+    private boolean isNetworkEnabled = true;
     private boolean zoomListener = false;
     private boolean landscape;
     private int mMapType = GoogleMap.MAP_TYPE_NORMAL;
@@ -206,16 +208,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onProviderEnabled(String provider) {
-                if (LocationManager.GPS_PROVIDER.equals(provider)) { //FIXME
-                    mGpsWarning.setVisibility(View.GONE);
-                }
+
+                if (LocationManager.GPS_PROVIDER.equals(provider)) isGpsEnabled = true;
+                else if (LocationManager.NETWORK_PROVIDER.equals(provider)) isNetworkEnabled = true;
+
+                if (isGpsEnabled || isNetworkEnabled) mGpsWarning.setVisibility(View.GONE);
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-                if (LocationManager.GPS_PROVIDER.equals(provider)) { //FIXME
-                    mGpsWarning.setVisibility(View.VISIBLE);
-                }
+
+                if (LocationManager.GPS_PROVIDER.equals(provider)) isGpsEnabled = false;
+                else if (LocationManager.NETWORK_PROVIDER.equals(provider)) isNetworkEnabled = false;
+
+                if (!isGpsEnabled && !isNetworkEnabled) mGpsWarning.setVisibility(View.VISIBLE);
 
             }
 
