@@ -4,5 +4,7 @@
     <string name="action_settings">Settings</string>
     <string name="openDrawer">openDrawer</string>
     <string name="closeDrawer">closeDrawer</string>
+    <string name="lost_gps">GPS signal lost</string>
+    <string name="connectivity_lost">No internet connection</string>
 
 </resources>

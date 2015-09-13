@@ -1,6 +1,5 @@
 package com.jduban.gps;
 
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -49,35 +48,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final long MIN_TIME_UPDATE = 500;
     private static final float MIN_DISTANCE_UPDATE = 1;
     private static final String MAP_TYPE = "MAP TYPE";
+    private static final float DEFAULT_ZOOM = 18;
+
     private String mValues[] = {"", "","Location 1","Location 2","Location 3"};
-    private Toolbar mToolbar;
+
+    // Drawer
     RecyclerView mRecyclerView;
     RecyclerView.Adapter mAdapter;
     RecyclerView.LayoutManager mLayoutManager;
     DrawerLayout mDrawer;
     ActionBarDrawerToggle mDrawerToggle;
-
     GestureDetector mSingleTapDetector;
 
-    private double lastLatitude;
-    private double lastLongitude;
+    private double mLatitude;
+    private double mLongitude;
     private boolean isMapReady = false;
+    private boolean zoomListener = false;
     private boolean landscape;
-    private int mapType = GoogleMap.MAP_TYPE_NORMAL;
-
-    private float zoomSetting = -1;
+    private int mMapType = GoogleMap.MAP_TYPE_NORMAL;
+    private float mZoomSetting = -1;
 
     // UI COMPONENTS
-    private LinearLayout layoutMenu;
-    private MenuFragment menuFragment;
+    private Toolbar mToolbar;
+    private LinearLayout mLayoutMenu;
+    private MenuFragment mMenuFragment;
+    private MapFragment mMapFragment;
+    private TextView mConnectivityWarning;
+    private TextView mGpsWarning;
+    private LocationManager mLocationManager;
 
-
-    private MapFragment mapFragment;
-    private TextView connectivityWarning;
-    private TextView gpsWarning;
-    private LocationManager locationManager;
-    private float DEFAULT_ZOOM = 18;
-    private boolean zoomListener = false;
 
 
     @Override
@@ -85,10 +84,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState != null) {
-            // Restore value of members from saved state
-            mapType = savedInstanceState.getInt(MAP_TYPE);
+        if (savedInstanceState != null) {   // Get Saved map Type (Plan / Satellite)
+            mMapType = savedInstanceState.getInt(MAP_TYPE);
         }
+        landscape = getResources().getBoolean(R.bool.landscape); // is device in landscape
 
         mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
@@ -100,8 +99,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             }
         });
-
-        landscape = getResources().getBoolean(R.bool.landscape);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
@@ -131,44 +128,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mDrawer.setDrawerListener(mDrawerToggle); // mDrawer Listener set to the mDrawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
 
-        layoutMenu = (LinearLayout) findViewById(R.id.fragmentMenu);
+        mMenuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
+        mMenuFragment.setMValues(mValues);
 
+        mConnectivityWarning = (TextView) findViewById(R.id.connectivityWaring);
+        mGpsWarning = (TextView) findViewById(R.id.gpsWarning);
 
-        menuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
-        menuFragment.setMValues(mValues);
+        // Display the menu fragment if landscape
+        mLayoutMenu = (LinearLayout) findViewById(R.id.fragmentMenu);
 
-
-        // Displays the menu fragment in landscape
         if(!landscape){
-            layoutMenu.setVisibility(View.GONE);
+            mLayoutMenu.setVisibility(View.GONE);
         }
         else{
-            layoutMenu.setVisibility(View.VISIBLE);
-            menuFragment.displayLocations();
-
+            mLayoutMenu.setVisibility(View.VISIBLE);
+            mMenuFragment.displayLocations();
         }
 
         startLocationListener();
 
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
+        mMapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mMapFragment.getMapAsync(this);
         initializeMapTypeSelector();
 
-        connectivityWarning = (TextView) findViewById(R.id.connectivityWaring);
-        gpsWarning = (TextView) findViewById(R.id.gpsWarning);
-
+        // Start connectivity receiver
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction("android.location.GPS_ENABLED_CHANGE");
         registerReceiver(networkStateReceiver, filter);
-
-        // GPS TESTS
-//        canUseGps = whichProvider.equals("gps")|| whichProvider.equals("any");
-//        canUseNetwork = whichProvider.equals("network")|| whichProvider.equals("any");
-
 
     }
 
+    // Drawer menu listener
     RecyclerView.OnItemTouchListener recyclerListener = new RecyclerView.OnItemTouchListener() {
         @Override
         public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
@@ -176,18 +165,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             if (child != null && mSingleTapDetector.onTouchEvent(motionEvent)) {
                 mDrawer.closeDrawers();
-                Fragment f;
 
-                switch (recyclerView.getChildPosition(child)) {
+                switch (recyclerView.getChildAdapterPosition(child)) {
                     default:
-//                            f = new Fragment1();
                         break;
 
                 }
-//                    fm.beginTransaction().replace(R.id.container, f).commit();
                 return true;
             }
-
             return false;
         }
 
@@ -199,9 +184,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
+    /**
+     * Listen to GPS locations updates from network and GPS providers
+     * Manage GPS signal loss
+     * Provide the most accurate location to the app by comparing network and gps locations
+     */
     private void startLocationListener(){
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         LocationListener listener = new LocationListener() {
 
@@ -212,15 +202,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onProviderEnabled(String provider) {
-                if (LocationManager.GPS_PROVIDER.equals(provider)) {
-                    gpsWarning.setVisibility(View.GONE);
+                if (LocationManager.GPS_PROVIDER.equals(provider)) { //FIXME
+                    mGpsWarning.setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-                if (LocationManager.GPS_PROVIDER.equals(provider)) {
-                    gpsWarning.setVisibility(View.VISIBLE);
+                if (LocationManager.GPS_PROVIDER.equals(provider)) { //FIXME
+                    mGpsWarning.setVisibility(View.VISIBLE);
                 }
 
             }
@@ -230,40 +220,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 String provider;
 
-                if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getAccuracy() <
-                        locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getAccuracy())
+                // Compare providers' accuracy
+                if (mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getAccuracy() <
+                        mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getAccuracy())
                     provider = LocationManager.GPS_PROVIDER;
                 else
                     provider = LocationManager.NETWORK_PROVIDER;
 
-                lastLatitude = locationManager.getLastKnownLocation(provider).getLatitude();            //FIXME : Can be improved
-                lastLongitude = locationManager.getLastKnownLocation(provider).getLongitude();          // Last known location is not obviously the best
-
-                mValues[0] = lastLatitude + " " + lastLongitude; //TODO convert to DMS format
-                zoomOnUser(lastLatitude, lastLongitude);
-
+                updateCoordinates(provider);
                 updateAccuracy(provider);
-
-                if (!landscape) {
-                    mAdapter.notifyDataSetChanged();
-                } else {
-                    menuFragment.setCoordinates(mValues[0]);
-                }
-
-
             }
         };
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, listener);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, listener);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, listener);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, listener);
 
 
     }
 
+    /**
+     * Enable or disable the drawer menu
+     * @param isEnabled true : enable the drawer
+     */
     public void setDrawerState(boolean isEnabled) {
         if ( isEnabled ) {
             mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-//            mDrawerToggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_UNLOCKED);
             mDrawerToggle.onDrawerStateChanged(DrawerLayout.STATE_SETTLING);
             mDrawerToggle.setDrawerIndicatorEnabled(true);
             mDrawerToggle.syncState();
@@ -280,16 +261,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onResume() {
         super.onResume();
-        if(landscape)
+
+        if(landscape) // disable the drawer in landscape
             setDrawerState(false);
         else
             setDrawerState(true);
 
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
     }
 
     @Override
@@ -300,9 +277,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -312,9 +287,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (item.getItemId()){
             case R.id.action_settings:
                 break;
-
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -323,13 +296,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.openDrawer();
     }
 
+    /**
+     * Opens the drawer
+     */
     public void openDrawer(){
         mDrawer.openDrawer(GravityCompat.START);
     }
 
-
+    /**
+     * Add a marker on the map at the given lat / long
+     * @param latitude latitude of the marker
+     * @param longitude longitude of the marker
+     */
     public void addMapMarker(double latitude, double longitude) {
-        GoogleMap map = mapFragment.getMap();
+        GoogleMap map = mMapFragment.getMap();
 
         if (map != null && isMapReady) {
             map.addMarker(new MarkerOptions()
@@ -338,31 +318,64 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * Update the accuracy value in the menu (drawer or fragment)
+     * @param provider GPS provider
+     */
     public void updateAccuracy(String provider){
-        GoogleMap map = mapFragment.getMap();
+        GoogleMap map = mMapFragment.getMap();
 
         if (map != null && isMapReady) {
 
-            int accuracy = Math.round(locationManager.getLastKnownLocation(provider).getAccuracy());
+            int accuracy = Math.round(mLocationManager.getLastKnownLocation(provider).getAccuracy());
             mValues[1] = Integer.toString(accuracy) +" meters";
 
             if(!landscape){
                 mAdapter.notifyDataSetChanged();
             }else{
-                menuFragment.setAccuracy(mValues[1]);
+                mMenuFragment.setAccuracy(mValues[1]);
             }
         }
     }
 
+    /**
+     * Update coordinates value in the menu (drawer or fragment)
+     * and zoom on the user location
+     * @param provider GPS provider
+     */
+    public void updateCoordinates(String provider){
+        GoogleMap map = mMapFragment.getMap();
 
+        if (map != null && isMapReady) {
+
+            mLatitude = mLocationManager.getLastKnownLocation(provider).getLatitude();            //FIXME : Can be improved
+            mLongitude = mLocationManager.getLastKnownLocation(provider).getLongitude();          // Last known location is not obviously the best
+
+            mValues[0] = mLatitude + " " + mLongitude; //TODO convert to DMS format
+
+            if (!landscape) {
+                mAdapter.notifyDataSetChanged();
+            } else {
+                mMenuFragment.setCoordinates(mValues[0]);
+            }
+
+            zoomOnUser(mLatitude, mLongitude);
+        }
+    }
+
+    /**
+     * Zoom on a location
+     * @param latitude focused latitude
+     * @param longitude focused longitude
+     */
     public void zoomOnUser(double latitude, double longitude){
 
-        GoogleMap map = mapFragment.getMap();
+        GoogleMap map = mMapFragment.getMap();
         if (map != null && isMapReady){
 
-            float zoom;
-            if(zoomSetting != -1)
-                zoom = zoomSetting;
+            float zoom; // If the user changes the zoom, the zoom value will be kept
+            if(mZoomSetting != -1)
+                zoom = mZoomSetting;
             else
                 zoom = DEFAULT_ZOOM; // Default value
 
@@ -370,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             map.animateCamera(cameraUpdate, new GoogleMap.CancelableCallback() {
                 @Override
                 public void onFinish() {
-                    zoomListener = true; // Activate zoom listener so zoomSetting won't be set to 2 ( min default value)
+                    zoomListener = true; // Activate zoom listener so mZoomSetting won't be set to 2 ( min default value)
                 }
 
                 @Override
@@ -381,22 +394,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void setMapType(int type){
+    /**
+     * Set the map type (normal or sattelite
+     * @param type map type
+     *             can be GoogleMap.MAP_TYPE_NORMAL or GoogleMap.MAP_TYPE_SATELLITE
+     */
+    public void setmMapType(int type){
 
-        GoogleMap map = mapFragment.getMap();
+        GoogleMap map = mMapFragment.getMap();
         if (map != null && isMapReady){
             switch (type){
                 case 1:
-                    mapType = GoogleMap.MAP_TYPE_NORMAL;
+                    mMapType = GoogleMap.MAP_TYPE_NORMAL;
                     break;
                 case 2:
-                    mapType = GoogleMap.MAP_TYPE_SATELLITE;
+                    mMapType = GoogleMap.MAP_TYPE_SATELLITE;
                     break;
                 default:
-                    mapType = GoogleMap.MAP_TYPE_NORMAL;
+                    mMapType = GoogleMap.MAP_TYPE_NORMAL;
                     break;
             }
-            map.setMapType(mapType);
+            map.setMapType(mMapType);
         }
     }
 
@@ -406,31 +424,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.setMapType(mapType);
+        map.setMapType(mMapType);
 
         isMapReady = true;
 
         map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                if(zoomListener)
-                    zoomSetting = cameraPosition.zoom;
+                if(zoomListener)                            // true after user location initialization
+                    mZoomSetting = cameraPosition.zoom;
             }
         });
     }
 
+    /**
+     * Display the map type selector
+     */
     private void initializeMapTypeSelector() {
+
         final ExpandableSelector iconsExpandableSelector = (ExpandableSelector) findViewById(R.id.selector);
         List<ExpandableItem> expandableItems = new ArrayList<>();
+
         ExpandableItem item = new ExpandableItem();
         item.setResourceId(R.mipmap.ic_expand);
         expandableItems.add(item);
+
         item = new ExpandableItem();
         item.setResourceId(R.mipmap.ic_plan);
         expandableItems.add(item);
+
         item = new ExpandableItem();
         item.setResourceId(R.mipmap.ic_satellite);
         expandableItems.add(item);
+
         iconsExpandableSelector.showExpandableItems(expandableItems);
 
         iconsExpandableSelector.setExpandableSelectorListener(new ExpandableSelectorListener() {
@@ -463,7 +489,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onExpandableItemClickListener(int i, View view) {
                 if (i !=0)
-                    setMapType(i);
+                    setmMapType(i);
 
                 iconsExpandableSelector.collapse();
             }
@@ -471,7 +497,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-
+    // Displays a banner if internet connectivity lost
     BroadcastReceiver networkStateReceiver = new BroadcastReceiver() {
 
         @Override
@@ -483,9 +509,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
                 if (!isConnected ) {
-                    connectivityWarning.setVisibility(View.VISIBLE);
+                    mConnectivityWarning.setVisibility(View.VISIBLE);
                 } else {
-                    connectivityWarning.setVisibility(View.GONE);
+                    mConnectivityWarning.setVisibility(View.GONE);
                 }
             }
         }
@@ -494,11 +520,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-
-        // Save the user's current game state
-        savedInstanceState.putInt(MAP_TYPE, mapType);
-
-        // Always call the superclass so it can save the view hierarchy state
+        savedInstanceState.putInt(MAP_TYPE, mMapType); //Saves the selected map type
         super.onSaveInstanceState(savedInstanceState);
     }
 

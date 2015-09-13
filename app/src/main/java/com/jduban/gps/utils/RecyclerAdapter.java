@@ -25,10 +25,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        int Holderid;
+        int holderId;
 
         TextView textView;
-        TextView accuracy;
         ImageView imageView;
 
         public ViewHolder(View itemView, int ViewType) {
@@ -37,17 +36,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             if (TYPE_LOCATION == ViewType){
                 textView = (TextView) itemView.findViewById(R.id.rowText);
                 imageView = (ImageView) itemView.findViewById(R.id.rowIcon);
-                Holderid = 3;
+                holderId = 3;
             }
             if (TYPE_ACCURACY == ViewType){
                 textView = (TextView) itemView.findViewById(R.id.rowText);
                 imageView = (ImageView) itemView.findViewById(R.id.rowIcon);
-                Holderid = 2;
+                holderId = 2;
             }
             else if (TYPE_COORDINATE == ViewType) {
                 textView = (TextView) itemView.findViewById(R.id.rowText);
                 imageView = (ImageView) itemView.findViewById(R.id.rowIcon);
-                Holderid = 1;
+                holderId = 1;
             }
         }
     }
@@ -88,7 +87,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     @Override
     public void onBindViewHolder(RecyclerAdapter.ViewHolder holder, int position) {
 
-        if (holder.Holderid != 0    ) // Coordinates and saved locations
+        if (holder.holderId != 0    ) // Coordinates and saved locations
             holder.textView.setText(mValues[position - 1]);
 
     }
@@ -100,7 +99,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
 
-    // Witht the following method we check what type of view is being passed
+    // With the following method we check what type of view is being passed
     @Override
     public int getItemViewType(int position) {
         if (isPositionHeader(position))

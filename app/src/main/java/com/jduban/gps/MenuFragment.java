@@ -32,10 +32,17 @@ public class MenuFragment extends Fragment {
         return view;
     }
 
+    /**
+     * get menu values from activity
+     * @param mValues coordinates, accuracy
+     */
     public void setMValues(String[] mValues) {
         this.mValues = mValues;
     }
 
+    /**
+     * Display locations in menu
+     */
     public void displayLocations() {
 
         locationContainer.removeAllViews();
