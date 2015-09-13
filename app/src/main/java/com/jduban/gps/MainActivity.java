@@ -1,7 +1,6 @@
 package com.jduban.gps;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,13 +20,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -71,15 +68,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private float zoomSetting = -1;
 
     // UI COMPONENTS
-    private FragmentManager fm;
-    private RelativeLayout layoutMap;
     private LinearLayout layoutMenu;
     private MenuFragment menuFragment;
 
-    private TextView coordinatesTextView;
-    private TextView accuracyTextView;
-    private LinearLayout locationContainer;
-    private LayoutInflater inflater;
+
     private MapFragment mapFragment;
     private TextView connectivityWarning;
     private TextView gpsWarning;
@@ -109,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        landscape = getResources().getBoolean(R.bool.dual_pane);
+        landscape = getResources().getBoolean(R.bool.landscape);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
@@ -141,12 +133,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         layoutMenu = (LinearLayout) findViewById(R.id.fragmentMenu);
 
-        coordinatesTextView = (TextView) layoutMenu.findViewById(R.id.coordinate).findViewById(R.id.rowText);
-        accuracyTextView = (TextView) layoutMenu.findViewById(R.id.accuracy).findViewById(R.id.rowText);
-        locationContainer = (LinearLayout) layoutMenu.findViewById(R.id.locationContainer);
-        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         menuFragment = (MenuFragment ) getFragmentManager().findFragmentById(R.id.fragmentMenu);
+        menuFragment.setMValues(mValues);
 
 
         // Displays the menu fragment in landscape
@@ -155,15 +144,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         else{
             layoutMenu.setVisibility(View.VISIBLE);
-            locationContainer.removeAllViews();
+            menuFragment.displayLocations();
 
-            for (int i = 2 ; i < mValues.length ; i++) {
-
-                View view = inflater.inflate(R.layout.location, locationContainer, false); //TODO : improve with a runnable
-                ((TextView) view.findViewById(R.id.rowText)).setText(mValues[i]);
-                locationContainer.addView(view);
-
-            }
         }
 
         startLocationListener();
@@ -265,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (!landscape) {
                     mAdapter.notifyDataSetChanged();
                 } else {
-                    coordinatesTextView.setText(mValues[0]);
+                    menuFragment.setCoordinates(mValues[0]);
                 }
 
 
@@ -367,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if(!landscape){
                 mAdapter.notifyDataSetChanged();
             }else{
-                accuracyTextView.setText(mValues[1]);
+                menuFragment.setAccuracy(mValues[1]);
             }
         }
     }
@@ -500,7 +482,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
                 boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
-                if (!isConnected ) {        //TODO Add animation
+                if (!isConnected ) {
                     connectivityWarning.setVisibility(View.VISIBLE);
                 } else {
                     connectivityWarning.setVisibility(View.GONE);
