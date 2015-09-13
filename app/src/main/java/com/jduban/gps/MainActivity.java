@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final long MIN_TIME_UPDATE = 500;
     private static final float MIN_DISTANCE_UPDATE = 1;
+    private static final String MAP_TYPE = "MAP TYPE";
     private String mValues[] = {"", "","Location 1","Location 2","Location 3"};
     private Toolbar mToolbar;
     RecyclerView mRecyclerView;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double lastLongitude;
     private boolean isMapReady = false;
     private boolean landscape;
+    private int mapType = GoogleMap.MAP_TYPE_NORMAL;
 
     final boolean canUseGps = false;
     final boolean canUseNetwork = false;
@@ -90,6 +92,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (savedInstanceState != null) {
+            // Restore value of members from saved state
+            mapType = savedInstanceState.getInt(MAP_TYPE);
+        }
 
         mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
@@ -381,16 +388,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (map != null && isMapReady){
             switch (type){
                 case 1:
-                    map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    mapType = GoogleMap.MAP_TYPE_NORMAL;
                     break;
                 case 2:
-                    map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                    mapType = GoogleMap.MAP_TYPE_SATELLITE;
                     break;
                 default:
-                    map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    mapType = GoogleMap.MAP_TYPE_NORMAL;
                     break;
             }
-
+            map.setMapType(mapType);
         }
     }
 
@@ -401,6 +408,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.setMapType(mapType);
     }
 
     private void initializeMapTypeSelector() {
@@ -474,6 +482,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     };
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Save the user's current game state
+        savedInstanceState.putInt(MAP_TYPE, mapType);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
 
 }
 
