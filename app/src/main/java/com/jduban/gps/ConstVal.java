@@ -10,11 +10,13 @@ import android.widget.Toast;
 public class ConstVal extends Application{
 
 
+    public static String DISPLAY_POPUP = "DISPLAY_POPUP";
+
     @Override
     public void onCreate() {
         super.onCreate();
 
-        if (isNetworkAvailable(this)){
+        if (!isNetworkAvailable(this)){
             Toast.makeText(this, "Please check your internet connection", Toast.LENGTH_SHORT).show();
         }
 
@@ -27,7 +29,7 @@ public class ConstVal extends Application{
      * @param context Context
      * @return location mode from Settings.Secure
      */
-    public int getLocationMode(Context context){ //TODO : display dialog
+    public static int getLocationMode(Context context){ //TODO : display dialog
         try {
             return Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
         } catch (Settings.SettingNotFoundException e) {

@@ -6,5 +6,8 @@
     <string name="closeDrawer">closeDrawer</string>
     <string name="lost_gps">GPS signal lost</string>
     <string name="connectivity_lost">No internet connection</string>
+    <string name="high_precision">You can improve the accuracy of your location by turning on the high precision location in your GPS settings.</string>
+    <string name="dont_ask">Don\'t ask me again</string>
+    <string name="enable_GPS">Your GPS is currently disabled. Please activate it to use the application.</string>
 
 </resources>

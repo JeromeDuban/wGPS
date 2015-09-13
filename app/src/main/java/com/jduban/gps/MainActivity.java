@@ -4,12 +4,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -23,7 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // UI COMPONENTS
     private Toolbar mToolbar;
-    private LinearLayout mLayoutMenu;
+    private ScrollView mLayoutMenu;
     private MenuFragment mMenuFragment;
     private MapFragment mMapFragment;
     private TextView mConnectivityWarning;
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGpsWarning = (TextView) findViewById(R.id.gpsWarning);
 
         // Display the menu fragment if landscape
-        mLayoutMenu = (LinearLayout) findViewById(R.id.fragmentMenu);
+        mLayoutMenu = (ScrollView) findViewById(R.id.fragmentMenu);
 
         if(!landscape){
             mLayoutMenu.setVisibility(View.GONE);
@@ -154,6 +156,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Start connectivity receiver
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkStateReceiver, filter);
+
+        checkGPS();
 
     }
 
@@ -221,14 +225,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String provider;
 
                 // Compare providers' accuracy
-                if (mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getAccuracy() <
-                        mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getAccuracy())
-                    provider = LocationManager.GPS_PROVIDER;
-                else
-                    provider = LocationManager.NETWORK_PROVIDER;
+                Location gpsLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                Location networkLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                if (gpsLocation != null && networkLocation!=null){
+                    if(gpsLocation.getAccuracy() < networkLocation.getAccuracy()) {
+                        provider = LocationManager.GPS_PROVIDER;
+                    }
+                    else{
+                        provider = LocationManager.NETWORK_PROVIDER;
+                    }
+                    updateCoordinates(provider);
+                    updateAccuracy(provider);
+                }
+                else if (gpsLocation != null){
+                    updateCoordinates(LocationManager.GPS_PROVIDER);
+                    updateAccuracy(LocationManager.GPS_PROVIDER);
+                }
+                else if (networkLocation != null){
+                    updateCoordinates(LocationManager.NETWORK_PROVIDER);
+                    updateAccuracy(LocationManager.NETWORK_PROVIDER);
+                }
 
-                updateCoordinates(provider);
-                updateAccuracy(provider);
+
             }
         };
 
@@ -248,7 +266,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mDrawerToggle.onDrawerStateChanged(DrawerLayout.STATE_SETTLING);
             mDrawerToggle.setDrawerIndicatorEnabled(true);
             mDrawerToggle.syncState();
-
         }
         else {
             mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -516,6 +533,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     };
+
+    /**
+     * Check GPS status and displays a popup
+     */
+    private void checkGPS() {
+        int value = ConstVal.getLocationMode(this);
+        if (value == Settings.Secure.LOCATION_MODE_OFF){
+            InfoDialog dialog=new InfoDialog(this, getResources().getString(R.string.enable_GPS), false);
+            dialog.show();
+        }
+        else if( value != Settings.Secure.LOCATION_MODE_HIGH_ACCURACY){ //FIXME && not shared prefs
+            SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+            if (sharedPref.getBoolean(ConstVal.DISPLAY_POPUP,true)){
+                InfoDialog dialog=new InfoDialog(this, getResources().getString(R.string.high_precision), true);
+                dialog.show();
+            }
+
+        }
+    }
 
 
     @Override
