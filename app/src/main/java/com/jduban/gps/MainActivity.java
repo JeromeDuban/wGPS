@@ -35,6 +35,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.jduban.gps.utils.RecyclerAdapter;
@@ -45,9 +46,6 @@ import com.karumi.expandableselector.OnExpandableItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
-
-//TODO save Map type
-//TODO save user zoom choice
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
 
@@ -70,8 +68,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean landscape;
     private int mapType = GoogleMap.MAP_TYPE_NORMAL;
 
-    final boolean canUseGps = false;
-    final boolean canUseNetwork = false;
+    private float zoomSetting = -1;
 
     // UI COMPONENTS
     private FragmentManager fm;
@@ -87,6 +84,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView connectivityWarning;
     private TextView gpsWarning;
     private LocationManager locationManager;
+    private float DEFAULT_ZOOM = 18;
+    private boolean zoomListener = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (child != null && mSingleTapDetector.onTouchEvent(motionEvent)) {
                 mDrawer.closeDrawers();
                 Fragment f;
+
                 switch (recyclerView.getChildPosition(child)) {
                     default:
 //                            f = new Fragment1();
@@ -377,8 +378,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleMap map = mapFragment.getMap();
         if (map != null && isMapReady){
 
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude), 18);
-            map.animateCamera(cameraUpdate);
+            float zoom;
+            if(zoomSetting != -1)
+                zoom = zoomSetting;
+            else
+                zoom = DEFAULT_ZOOM; // Default value
+
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longitude), zoom);
+            map.animateCamera(cameraUpdate, new GoogleMap.CancelableCallback() {
+                @Override
+                public void onFinish() {
+                    zoomListener = true; // Activate zoom listener so zoomSetting won't be set to 2 ( min default value)
+                }
+
+                @Override
+                public void onCancel() {
+
+                }
+            });
         }
     }
 
@@ -404,11 +421,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap map) {
         Log.i("MAP", "Map ready");
-        isMapReady = true;
 
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setMapType(mapType);
+
+        isMapReady = true;
+
+        map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                if(zoomListener)
+                    zoomSetting = cameraPosition.zoom;
+            }
+        });
     }
 
     private void initializeMapTypeSelector() {
