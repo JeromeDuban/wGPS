@@ -1,4 +1,4 @@
-package com.jduban.drawer;
+package com.jduban.gps;
 
 /**
  * Created by jduban on 10/09/15.

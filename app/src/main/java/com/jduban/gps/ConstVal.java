@@ -1,4 +1,4 @@
-package com.jduban.drawer;
+package com.jduban.gps;
 
 import android.app.Application;
 import android.content.Context;

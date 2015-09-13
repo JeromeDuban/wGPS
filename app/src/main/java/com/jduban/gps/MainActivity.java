@@ -1,4 +1,4 @@
-package com.jduban.drawer;
+package com.jduban.gps;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -38,7 +38,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.jduban.drawer.utils.recyclerAdapter;
+import com.jduban.gps.utils.RecyclerAdapter;
 import com.karumi.expandableselector.ExpandableItem;
 import com.karumi.expandableselector.ExpandableSelector;
 import com.karumi.expandableselector.ExpandableSelectorListener;
@@ -52,7 +52,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
 
-    private String mValues[] = {"", "Location 1","Location 2","Location 3"};
+    private String mValues[] = {"", "","Location 1","Location 2","Location 3"};
     private Toolbar mToolbar;
     RecyclerView mRecyclerView;
     RecyclerView.Adapter mAdapter;
@@ -73,13 +73,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LinearLayout layoutMenu;
     private MenuFragment menuFragment;
 
-    private TextView menuTextView;
+    private TextView coordinatesTextView;
+    private TextView accuracyTextView;
     private LinearLayout locationContainer;
     private LayoutInflater inflater;
     private MapFragment mapFragment;
     private TextView connectivityWarning;
     private TextView gpsWarning;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new recyclerAdapter(mValues);
+        mAdapter = new RecyclerAdapter(mValues);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnItemTouchListener(recyclerListener);
 
@@ -129,7 +129,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         layoutMenu = (LinearLayout) findViewById(R.id.fragmentMenu);
 
-        menuTextView = (TextView) layoutMenu.findViewById(R.id.coordinate).findViewById(R.id.rowText);
+        coordinatesTextView = (TextView) layoutMenu.findViewById(R.id.coordinate).findViewById(R.id.rowText);
+        accuracyTextView = (TextView) layoutMenu.findViewById(R.id.accuracy).findViewById(R.id.rowText);
         locationContainer = (LinearLayout) layoutMenu.findViewById(R.id.locationContainer);
         inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -144,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             layoutMenu.setVisibility(View.VISIBLE);
             locationContainer.removeAllViews();
 
-            for (int i = 1 ; i < mValues.length ; i++) {
+            for (int i = 2 ; i < mValues.length ; i++) {
 
                 View view = inflater.inflate(R.layout.location, locationContainer, false); //TODO : improve with a runnable
                 ((TextView) view.findViewById(R.id.rowText)).setText(mValues[i]);
@@ -235,12 +236,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 mValues[0] =  lastLatitude + " " + lastLongitude ; //TODO convert to DMS format
                 zoomOnUser(lastLatitude,lastLongitude);
+                updateAccuracy();
 
                 if(!landscape){
                     mAdapter.notifyDataSetChanged();
                 }else{
-                    menuTextView.setText(mValues[0]);
+                    coordinatesTextView.setText(mValues[0]);
                 }
+
 
             }
         });
@@ -324,6 +327,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             map.addMarker(new MarkerOptions()
                     .position(new LatLng(latitude, longitude))
                     .title("Marker"));
+        }
+    }
+
+    public void updateAccuracy(){
+        GoogleMap map = mapFragment.getMap();
+
+        if (map != null && map.getMyLocation() !=null  && isMapReady) {
+            int accuracy = Math.round(map.getMyLocation().getAccuracy());
+            mValues[1] = Integer.toString(accuracy) +" meters";
+            if(!landscape){
+                mAdapter.notifyDataSetChanged();
+            }else{
+                accuracyTextView.setText(mValues[1]);
+            }
         }
     }
 

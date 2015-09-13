@@ -17,6 +17,10 @@
                 android:id="@+id/coordinate"
                 layout="@layout/coordinate" />
 
+            <include
+                android:id="@+id/accuracy"
+                layout="@layout/accuracy" />
+
             <LinearLayout
                 android:id="@+id/locationContainer"
                 android:layout_width="match_parent"

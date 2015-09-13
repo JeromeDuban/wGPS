@@ -25,7 +25,7 @@
 
             <fragment
                 android:id="@+id/fragmentMenu"
-                class="com.jduban.drawer.MenuFragment"
+                class="com.jduban.gps.MenuFragment"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

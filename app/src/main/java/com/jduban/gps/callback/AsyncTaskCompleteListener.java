@@ -1,4 +1,4 @@
-package com.jduban.drawer.callback;
+package com.jduban.gps.callback;
 
 /**
  * Callback interface for asyncTasks

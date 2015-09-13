@@ -6,9 +6,10 @@
     android:clickable="true">
 
     <LinearLayout
-        android:id="@+id/coordinates"
+        android:id="@+id/accuracy"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/coordinates"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingBottom="8dp"
@@ -22,7 +23,7 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginStart="16dp"
-            android:src="@mipmap/ic_world_grid" />
+            android:src="@mipmap/ic_accuracy" />
 
         <TextView
             android:id="@+id/rowText"
@@ -32,5 +33,11 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
 
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/accuracy"
+        android:background="#454545" />
 
 </RelativeLayout>
