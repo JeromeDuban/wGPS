@@ -1,7 +1,7 @@
 package com.jduban.gps.utils;
 
-import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -10,8 +10,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.jduban.gps.ConstVal;
-import com.jduban.gps.MainActivity;
 import com.jduban.gps.R;
+import com.jduban.gps.callback.DialogListener;
 import com.jduban.gps.objects.Location;
 
 /**
@@ -19,16 +19,17 @@ import com.jduban.gps.objects.Location;
  */
 public class LocationDialog extends Dialog {
 
-    private MainActivity a;
-    private Dialog d;
+    private Context c;
+    private DialogListener listener;
     private Button cancel, add;
     private EditText name;
     private double latitude;
     private double longitude;
 
-    public LocationDialog(Activity a, double latitude, double longitude) {
-        super(a);
-        this.a = (MainActivity) a;
+    public LocationDialog(Context c, DialogListener listener, double latitude, double longitude) {
+        super(c);
+        this.c = c;
+        this.listener = listener;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -57,7 +58,8 @@ public class LocationDialog extends Dialog {
             public void onClick(View v) {
                 Location loc = new Location(Double.toString(latitude), Double.toString(longitude), name.getText().toString());
                 ConstVal.addToList(loc);
-                Toast.makeText(a, name.getText().toString() + " added", Toast.LENGTH_SHORT).show();
+                Toast.makeText(c, name.getText().toString() + " added", Toast.LENGTH_SHORT).show();
+                listener.onMarkerAdded();
                 dismiss();
             }
         });

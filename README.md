@@ -18,4 +18,5 @@ La connectivité réseau est également monitorée. Un receiver permet de recevo
 
 #Dépendances
 https://github.com/Karumi/ExpandableSelector
+
 https://github.com/markushi/android-circlebutton

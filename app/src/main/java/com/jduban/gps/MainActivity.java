@@ -27,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,6 +37,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.jduban.gps.callback.DialogListener;
 import com.jduban.gps.utils.InfoDialog;
 import com.jduban.gps.utils.LocationDialog;
 import com.jduban.gps.utils.RecyclerAdapter;
@@ -49,7 +51,7 @@ import java.util.List;
 
 import at.markushi.ui.CircleButton;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, DialogListener{
 
     private static final long MIN_TIME_UPDATE = 500;
     private static final float MIN_DISTANCE_UPDATE = 1;
@@ -497,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void addLocation() {
         GoogleMap map = mMapFragment.getMap();
         if (map != null && isMapReady){
-            LocationDialog dialog = new LocationDialog(this, map.getMyLocation().getLatitude(), map.getMyLocation().getLongitude());
+            LocationDialog dialog = new LocationDialog(this,this,  map.getMyLocation().getLatitude(), map.getMyLocation().getLongitude());
             dialog.show();
         }
     }
@@ -606,9 +608,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * updates locations in menus
      */
     public void updateLocations(){
-
-        for (int i = ConstVal.locationList.size() ; i > 1 ; i--){
-            ConstVal.locationList.remove(i);
+        Toast.makeText(MainActivity.this, "Locations updated", Toast.LENGTH_SHORT).show();
+        
+        while (mValues.size() > 2){
+            mValues.remove(2);
         }
         for (int i = 0 ; i < ConstVal.locationList.size() ; i++){
             mValues.add(ConstVal.locationList.get(i).getName());
@@ -631,5 +634,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+    @Override
+    public void onMarkerAdded() {
+        updateLocations();
+    }
 }
 
