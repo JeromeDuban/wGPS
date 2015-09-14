@@ -639,6 +639,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (requestCode) {
             case (REQUEST): {
                 if (resultCode == RESULT_OK) {
+                    clearMap();
                     updateLocations();
                 }
                 break;
