@@ -20,7 +20,7 @@ L'utilisateur peut également sauvegarder sa position actuelle et lui donner un 
 
 #Screenshots
 
-<img src="/screens/Screenshot_2015-09-14-13-18-36.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-19-10.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-18-42.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-19-30.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-18-51.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-19-48.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-18-58.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-20-03.png" width="200px">
+<img src="/screens/Screenshot_2015-09-14-13-18-36.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-18-42.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-18-51.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-19-48.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-20-03.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-19-10.png" width="400px"> <img src="/screens/Screenshot_2015-09-14-13-19-30.png" width="400px"> <img src="/screens/Screenshot_2015-09-14-13-18-58.png" width="400px"> 
 
 #Dépendances
 https://github.com/Karumi/ExpandableSelector

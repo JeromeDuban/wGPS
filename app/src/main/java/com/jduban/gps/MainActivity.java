@@ -598,7 +598,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             InfoDialog dialog=new InfoDialog(this, getResources().getString(R.string.enable_GPS), false);
             dialog.show();
         }
-        else if( value != Settings.Secure.LOCATION_MODE_HIGH_ACCURACY){ //FIXME && not shared prefs
+        else if( value != Settings.Secure.LOCATION_MODE_HIGH_ACCURACY){
             SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
             if (sharedPref.getBoolean(ConstVal.DISPLAY_POPUP,true)){
                 InfoDialog dialog=new InfoDialog(this, getResources().getString(R.string.high_precision), true);
