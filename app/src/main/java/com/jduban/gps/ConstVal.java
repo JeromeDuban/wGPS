@@ -23,7 +23,7 @@ public class ConstVal extends Application{
 
     public final static String DISPLAY_POPUP = "DISPLAY_POPUP";
     private static String APP_DIRECTORY;
-    private static ArrayList<Location> locationList;
+    public static ArrayList<Location> locationList;
 
     @Override
     public void onCreate() {

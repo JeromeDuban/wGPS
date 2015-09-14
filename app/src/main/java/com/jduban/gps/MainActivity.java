@@ -113,9 +113,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mValues = new ArrayList<>();
         mValues.add("");
         mValues.add("");
-        mValues.add("Location 1");
-        mValues.add("Location 2");
-        mValues.add("Location 3");
+        for (int i = 0 ; i < ConstVal.locationList.size() ; i++){
+            mValues.add(ConstVal.locationList.get(i).getName());
+        }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
@@ -192,11 +192,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (child != null && mSingleTapDetector.onTouchEvent(motionEvent)) {
                 mDrawer.closeDrawers();
 
-                switch (recyclerView.getChildAdapterPosition(child)) {
-                    default:
-                        break;
+                clearMap();
+                com.jduban.gps.objects.Location l  = ConstVal.locationList.get(recyclerView.getChildAdapterPosition(child) - 2 - 1); // coord & accuracy - index shift
+                addMapMarker(Double.parseDouble(l.getLatitude()),Double.parseDouble(l.getLongitude()),l.getName());
 
-                }
+//                switch (recyclerView.getChildAdapterPosition(child)) {
+//                    default:
+//                        break;
+//
+//                }
                 return true;
             }
             return false;
@@ -351,13 +355,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param latitude latitude of the marker
      * @param longitude longitude of the marker
      */
-    public void addMapMarker(double latitude, double longitude) {
+    public void addMapMarker(double latitude, double longitude, String title) {
         GoogleMap map = mMapFragment.getMap();
 
         if (map != null && isMapReady) {
             map.addMarker(new MarkerOptions()
                     .position(new LatLng(latitude, longitude))
-                    .title("Marker"));
+                    .title(title));
         }
     }
 
@@ -442,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param type map type
      *             can be GoogleMap.MAP_TYPE_NORMAL or GoogleMap.MAP_TYPE_SATELLITE
      */
-    public void setmMapType(int type){
+    private void setmMapType(int type){
 
         GoogleMap map = mMapFragment.getMap();
         if (map != null && isMapReady){
@@ -459,6 +463,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             map.setMapType(mMapType);
         }
+    }
+
+    /**
+     * Remove previous markers
+     */
+    public void clearMap(){
+        GoogleMap map = mMapFragment.getMap();
+        if (map != null && isMapReady){
+            map.clear();
+        }
+
     }
 
     @Override
