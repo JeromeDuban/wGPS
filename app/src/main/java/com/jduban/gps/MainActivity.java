@@ -602,6 +602,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * updates locations in menus
+     */
+    public void updateLocations(){
+
+        for (int i = ConstVal.locationList.size() ; i > 1 ; i--){
+            ConstVal.locationList.remove(i);
+        }
+        for (int i = 0 ; i < ConstVal.locationList.size() ; i++){
+            mValues.add(ConstVal.locationList.get(i).getName());
+        }
+
+        if (landscape){
+            mMenuFragment.setMValues(mValues);
+            mMenuFragment.displayLocations();
+        }
+        else{
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
