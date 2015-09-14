@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.jduban.gps;
+package com.jduban.gps.utils;
 
 import android.view.MotionEvent;
 import android.view.VelocityTracker;

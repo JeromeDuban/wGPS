@@ -20,10 +20,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jduban.gps.objects.Location;
+import com.jduban.gps.utils.SwipeDismissTouchListener;
 
 import java.util.ArrayList;
 
-public class ManageLocations extends Activity{
+public class ManageLocationsActivity extends Activity{
 
 
     private LinearLayout locationLayout;
@@ -34,7 +35,7 @@ public class ManageLocations extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_locations);
 
-        Toast.makeText(ManageLocations.this, "Swipe a location to delete it", Toast.LENGTH_LONG).show();
+        Toast.makeText(ManageLocationsActivity.this, "Swipe a location to delete it", Toast.LENGTH_LONG).show();
 
         locationLayout = (LinearLayout) findViewById(R.id.listLocations);
         continueButton = (Button) findViewById(R.id.continueButton);

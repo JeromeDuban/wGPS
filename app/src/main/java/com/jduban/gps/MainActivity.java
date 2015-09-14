@@ -337,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         switch (item.getItemId()){
             case R.id.manage_locations:
-                Intent i = new Intent(MainActivity.this, ManageLocations.class);
+                Intent i = new Intent(MainActivity.this, ManageLocationsActivity.class);
                 startActivityForResult(i,REQUEST);
                 break;
         }

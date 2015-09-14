@@ -32,7 +32,6 @@ public class InfoDialog extends Dialog {
 
     public InfoDialog(Activity a, String text, boolean displayBox) {
         super(a);
-        // TODO Auto-generated constructor stub
         this.c = a;
         this.text = text;
         this.displayBox = displayBox;
@@ -84,7 +83,7 @@ public class InfoDialog extends Dialog {
     }
 
     /**
-     * Ssave popup settings in shared Prefs
+     * Save popup settings in shared Prefs
      */
     private void saveSettings() {
         if (box.isChecked()){
