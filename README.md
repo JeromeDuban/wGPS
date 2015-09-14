@@ -16,7 +16,18 @@ Pour le GPS, l'application vérifie que l'utilisateur a bien son GPS activé au 
 
 La connectivité réseau est également monitorée. Un receiver permet de recevoir les changements d'états du réseau. L'application ne vérifie pas si une connection existe bel et bien pour ne pas multiplier les appels réseaux. Cependant, si ni le wifi ni le réseau cellulaire n'est disponible, l'utilisateur en sera averti grâce à un bandeau au bas de l'écran. 
 
+L'utilisateur peut également sauvegarder sa position actuelle et lui donner un nom grâce au bouton "+" en bas de l'écran. Depuis le menu, il pourra cliquer sur ce lieu pour faire appaitre un marqueur sur la carte. Ces lieux peuvent être supprimés grâce au menu en haut a droite de l'application. Une fois sur la liste des lieux enregistrés, l'utilisateur peut faire glisser les elements vers l'exterieur de l'écran pour les supprimer.
+
+#Screenshots
+
+<img src="/screens/Screenshot_2015-09-14-13-18-36.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-19-10.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-18-42.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-19-30.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-18-51.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-19-48.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-18-58.png" width="200px"> <img src="/screens/Screenshot_2015-09-14-13-20-03.png" width="200px">
+
 #Dépendances
 https://github.com/Karumi/ExpandableSelector
 
 https://github.com/markushi/android-circlebutton
+
+https://github.com/JakeWharton/SwipeToDismissNOA
+
+#Problèmes rencontrés
+Le bouton pour acceder ouvrir le menu ne fonctionne pas lors de la premiere exécution, il faut faire glisser le menu pour que le bouton fonctionne.
