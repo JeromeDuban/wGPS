@@ -12,9 +12,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class MenuFragment extends Fragment {
 
-    private String[] mValues;
+    private ArrayList<String> mValues;
     private TextView accuracyTextView;
     private TextView coordinatesTextView;
     private LinearLayout locationContainer;
@@ -36,7 +38,7 @@ public class MenuFragment extends Fragment {
      * get menu values from activity
      * @param mValues coordinates, accuracy
      */
-    public void setMValues(String[] mValues) {
+    public void setMValues(ArrayList<String> mValues) {
         this.mValues = mValues;
     }
 
@@ -48,10 +50,10 @@ public class MenuFragment extends Fragment {
         locationContainer.removeAllViews();
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        for (int i = 2 ; i < mValues.length ; i++) {
+        for (int i = 2 ; i < mValues.size() ; i++) {
 
             View view = inflater.inflate(R.layout.location, locationContainer, false); //TODO : improve with a runnable
-            ((TextView) view.findViewById(R.id.rowText)).setText(mValues[i]);
+            ((TextView) view.findViewById(R.id.rowText)).setText(mValues.get(i));
             locationContainer.addView(view);
 
         }

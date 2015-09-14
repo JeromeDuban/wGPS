@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import com.jduban.gps.R;
 
+import java.util.ArrayList;
+
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
@@ -21,7 +23,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     private static final int TYPE_ACCURACY = 2;
     private static final int TYPE_LOCATION = 3;
 
-    private String mValues[];
+    private ArrayList<String> mValues;
 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -52,7 +54,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
 
-    public RecyclerAdapter(String Titles[]) {
+    public RecyclerAdapter(ArrayList<String> Titles) {
         mValues = Titles;
     }
 
@@ -88,14 +90,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void onBindViewHolder(RecyclerAdapter.ViewHolder holder, int position) {
 
         if (holder.holderId != 0    ) // Coordinates and saved locations
-            holder.textView.setText(mValues[position - 1]);
+            holder.textView.setText(mValues.get(position - 1));
 
     }
 
     // This method returns the number of items present in the list
     @Override
     public int getItemCount() {
-        return mValues.length + 1; // the number of items in the list will be +1 the titles including the header view.
+        return mValues.size() + 1; // the number of items in the list will be +1 the titles including the header view.
     }
 
 

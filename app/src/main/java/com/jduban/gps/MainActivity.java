@@ -56,7 +56,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String MAP_TYPE = "MAP TYPE";
     private static final float DEFAULT_ZOOM = 18;
 
-    private String mValues[] = {"", "","Location 1","Location 2","Location 3"};
+//    private String mValues[] = {"", "","Location 1","Location 2","Location 3"};
+    private ArrayList<String> mValues;
 
     // Drawer
     RecyclerView mRecyclerView;
@@ -107,6 +108,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             }
         });
+
+        // Testing
+        mValues = new ArrayList<>();
+        mValues.add("");
+        mValues.add("");
+        mValues.add("Location 1");
+        mValues.add("Location 2");
+        mValues.add("Location 3");
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
@@ -362,12 +371,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (map != null && isMapReady) {
 
             int accuracy = Math.round(mLocationManager.getLastKnownLocation(provider).getAccuracy());
-            mValues[1] = Integer.toString(accuracy) +" meters";
+            mValues.set(1,Integer.toString(accuracy) +" meters");
 
             if(!landscape){
                 mAdapter.notifyDataSetChanged();
             }else{
-                mMenuFragment.setAccuracy(mValues[1]);
+                mMenuFragment.setAccuracy(mValues.get(1));
             }
         }
     }
@@ -385,12 +394,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mLatitude = mLocationManager.getLastKnownLocation(provider).getLatitude();            //FIXME : Can be improved
             mLongitude = mLocationManager.getLastKnownLocation(provider).getLongitude();          // Last known location is not obviously the best
 
-            mValues[0] = mLatitude + " " + mLongitude; //TODO convert to DMS format
+            mValues.set(0,mLatitude + " " + mLongitude); //TODO convert to DMS format
 
             if (!landscape) {
                 mAdapter.notifyDataSetChanged();
             } else {
-                mMenuFragment.setCoordinates(mValues[0]);
+                mMenuFragment.setCoordinates(mValues.get(0));
             }
 
             zoomOnUser(mLatitude, mLongitude);
