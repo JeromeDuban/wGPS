@@ -57,8 +57,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final float MIN_DISTANCE_UPDATE = 1;
     private static final String MAP_TYPE = "MAP TYPE";
     private static final float DEFAULT_ZOOM = 18;
+    private static final int REQUEST = 0;
 
-//    private String mValues[] = {"", "","Location 1","Location 2","Location 3"};
+    //    private String mValues[] = {"", "","Location 1","Location 2","Location 3"};
     private ArrayList<String> mValues;
 
     // Drawer
@@ -115,9 +116,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mValues = new ArrayList<>();
         mValues.add("");
         mValues.add("");
-        for (int i = 0 ; i < ConstVal.locationList.size() ; i++){
-            mValues.add(ConstVal.locationList.get(i).getName());
+
+        if (ConstVal.locationList != null){
+            for (int i = 0 ; i < ConstVal.locationList.size() ; i++){
+                mValues.add(ConstVal.locationList.get(i).getName());
+            }
         }
+
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
         mRecyclerView.setHasFixedSize(true);
@@ -193,16 +198,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             if (child != null && mSingleTapDetector.onTouchEvent(motionEvent)) {
                 mDrawer.closeDrawers();
+                int position = recyclerView.getChildAdapterPosition(child);
 
-                clearMap();
-                com.jduban.gps.objects.Location l  = ConstVal.locationList.get(recyclerView.getChildAdapterPosition(child) - 2 - 1); // coord & accuracy - index shift
-                addMapMarker(Double.parseDouble(l.getLatitude()),Double.parseDouble(l.getLongitude()),l.getName());
+                if (position > 2){ // No action for coordinates and accuracy
+                    clearMap();
+                    com.jduban.gps.objects.Location l  = ConstVal.locationList.get(recyclerView.getChildAdapterPosition(child) - 2 - 1); // coord & accuracy - index shift
+                    addMapMarker(Double.parseDouble(l.getLatitude()),Double.parseDouble(l.getLongitude()),l.getName());
+                }
 
-//                switch (recyclerView.getChildAdapterPosition(child)) {
-//                    default:
-//                        break;
-//
-//                }
                 return true;
             }
             return false;
@@ -326,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -334,7 +337,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()){
-            case R.id.action_settings:
+            case R.id.manage_locations:
+                Intent i = new Intent(MainActivity.this, ManageLocations.class);
+                startActivityForResult(i,REQUEST);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -609,7 +614,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     public void updateLocations(){
         Toast.makeText(MainActivity.this, "Locations updated", Toast.LENGTH_SHORT).show();
-        
+
         while (mValues.size() > 2){
             mValues.remove(2);
         }
@@ -623,6 +628,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         else{
             mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        System.out.println("Result Category");
+
+        switch (requestCode) {
+            case (REQUEST): {
+                if (resultCode == RESULT_OK) {
+                    updateLocations();
+                }
+                break;
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">wGPS</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="manage_locations">Manage locations</string>
     <string name="openDrawer">openDrawer</string>
     <string name="closeDrawer">closeDrawer</string>
     <string name="lost_gps">GPS signal lost</string>

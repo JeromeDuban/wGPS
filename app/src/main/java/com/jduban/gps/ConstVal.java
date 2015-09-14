@@ -99,7 +99,6 @@ public class ConstVal extends Application{
                 }
             }
         }
-        writeList();
     }
 
     private static void writeList(){
@@ -125,6 +124,8 @@ public class ConstVal extends Application{
     }
 
     public static void addToList(Location location){
+        if (locationList == null) locationList = new ArrayList<>();
+
         locationList.add(location);
         writeList();
     }
