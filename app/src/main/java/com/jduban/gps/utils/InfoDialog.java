@@ -1,4 +1,4 @@
-package com.jduban.gps;
+package com.jduban.gps.utils;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -13,6 +13,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+
+import com.jduban.gps.ConstVal;
+import com.jduban.gps.R;
 
 /**
  * Created by jduban on 13/09/15.

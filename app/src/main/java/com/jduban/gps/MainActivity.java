@@ -27,7 +27,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,6 +36,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.jduban.gps.utils.InfoDialog;
+import com.jduban.gps.utils.LocationDialog;
 import com.jduban.gps.utils.RecyclerAdapter;
 import com.karumi.expandableselector.ExpandableItem;
 import com.karumi.expandableselector.ExpandableSelector;
@@ -472,8 +473,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void addLocation() {
         GoogleMap map = mMapFragment.getMap();
         if (map != null && isMapReady){
-            Toast.makeText(MainActivity.this, Double.toString(map.getMyLocation().getLatitude())
-                    +":"+Double.toString(map.getMyLocation().getLongitude()), Toast.LENGTH_SHORT).show();
+            LocationDialog dialog = new LocationDialog(this, map.getMyLocation().getLatitude(), map.getMyLocation().getLongitude());
+            dialog.show();
         }
     }
 
