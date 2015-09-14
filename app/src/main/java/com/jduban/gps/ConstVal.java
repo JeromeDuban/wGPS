@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Environment;
 import android.provider.Settings;
 import android.widget.Toast;
 
@@ -29,7 +28,7 @@ public class ConstVal extends Application{
     public void onCreate() {
         super.onCreate();
 
-        APP_DIRECTORY = Environment.getExternalStorageDirectory().getAbsolutePath(); //TODO to be changed
+        APP_DIRECTORY = this.getFilesDir().getAbsolutePath();
 
         if (!isNetworkAvailable(this)){
             Toast.makeText(this, "Please check your internet connection", Toast.LENGTH_SHORT).show();
@@ -101,7 +100,7 @@ public class ConstVal extends Application{
         }
     }
 
-    private static void writeList(){
+    public static void writeList(){
 
 
         File f = new File(APP_DIRECTORY,"locations.csv");
@@ -112,9 +111,11 @@ public class ConstVal extends Application{
             f.createNewFile();
             FileWriter fw = new FileWriter(f.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
-            for (int i = 0 ; i < locationList.size() ; i++){
-                Location l= locationList.get(i);
-                bw.write(l.getLatitude()+delims+l.getLongitude()+delims+l.getName()+"\n");
+            if (locationList !=null){
+                for (int i = 0 ; i < locationList.size() ; i++){
+                    Location l= locationList.get(i);
+                    bw.write(l.getLatitude()+delims+l.getLongitude()+delims+l.getName()+"\n");
+                }
             }
 
             bw.close();

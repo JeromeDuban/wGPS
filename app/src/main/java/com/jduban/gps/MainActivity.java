@@ -27,7 +27,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -613,14 +612,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * updates locations in menus
      */
     public void updateLocations(){
-        Toast.makeText(MainActivity.this, "Locations updated", Toast.LENGTH_SHORT).show();
 
         while (mValues.size() > 2){
             mValues.remove(2);
         }
-        for (int i = 0 ; i < ConstVal.locationList.size() ; i++){
-            mValues.add(ConstVal.locationList.get(i).getName());
+        if (ConstVal.locationList !=null){
+            for (int i = 0 ; i < ConstVal.locationList.size() ; i++){
+                mValues.add(ConstVal.locationList.get(i).getName());
+            }
         }
+
 
         if (landscape){
             mMenuFragment.setMValues(mValues);
@@ -634,7 +635,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        System.out.println("Result Category");
 
         switch (requestCode) {
             case (REQUEST): {
